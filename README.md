@@ -113,4 +113,4 @@ Deploy the application to a production server.
 This project is licensed under the MIT License.
 
 ## Contact
-For any inquiries, please contact [Your Name] at [Your Email].
+For any inquiries, please contact Kaleab Tekle Woldemariam at gis10kwo@gmail.com.

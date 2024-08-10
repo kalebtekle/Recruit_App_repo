@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
      # Third-party apps
+     'graphql_jwt',
     'corsheaders',
     'graphene_django',
     'users',
@@ -146,4 +148,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Your frontend URL
 ]
 
+GRAPHQL_JWT = {
+    'JWT_ALLOW_REFRESH': True,
+    'JWT_EXPIRATION_DELTA': timedelta(minutes=5),  # Set token expiration
+    'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=7),  # Set refresh token expiration
+}
 

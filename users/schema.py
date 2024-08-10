@@ -6,15 +6,24 @@ from graphene_django import DjangoObjectType
 from graphene_django.forms.mutation import DjangoModelFormMutation
 from django.contrib.auth.forms import UserCreationForm
 from graphene import ObjectType, String, Boolean
-from .utils import generate_jwt_token, decode_jwt_token
+from .models import Profile
+from .utils import decode_jwt_token
+import graphql_jwt
 from graphql_jwt.shortcuts import get_token
+from graphql_jwt.decorators import login_required
+
 
 class LoginResponseType(ObjectType):
     success = Boolean()
     message = String()
     token = String()
 
+class UserProfileType(DjangoObjectType):
+    class Meta:
+        model = Profile
+
 class UserType(DjangoObjectType):
+    profile = graphene.Field(UserProfileType)
     class Meta:
         model = User
 
@@ -51,12 +60,16 @@ class RegisterMutation(DjangoModelFormMutation):
 class Mutation(graphene.ObjectType):
     login = LoginMutation.Field()
     register = RegisterMutation.Field()
+    token_auth = graphql_jwt.ObtainJSONWebToken.Field()  
+    verify_token = graphql_jwt.Verify.Field()   # For obtaining a new token
+    refresh_token = graphql_jwt.Refresh.Field() # For refreshing the token
 
 class Query(graphene.ObjectType):
-    me = graphene.Field(UserType)
     users = graphene.List(UserType)
+    current_user = graphene.Field(UserType)
+    get_user_profile = graphene.Field(UserProfileType, id=graphene.ID(required=True))
 
-    def resolve_me(self, info):
+    def resolve_current_user(self, info):
         auth = info.context.META.get('HTTP_AUTHORIZATION')
         if auth:
             try:
@@ -71,3 +84,16 @@ class Query(graphene.ObjectType):
 
     def resolve_users(self, info):
         return User.objects.all()
+    
+    @login_required
+    def resolve_current_user(self, info):
+        user = info.context.user
+        return user
+    
+    @login_required
+    def resolve_get_user_profile(self,info, id):
+        # Fetch the user profile from the database
+        user = info.context.user
+        if user.is_authenticated:
+            return user  # Return the authenticated user
+        return None  # Or raise an error if necessary

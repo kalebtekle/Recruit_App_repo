@@ -18,15 +18,60 @@ class LoginResponseType(ObjectType):
     message = String()
     token = String()
 
-class UserProfileType(DjangoObjectType):
+class ProfileType(DjangoObjectType):
+    
     class Meta:
         model = Profile
 
 class UserType(DjangoObjectType):
-    profile = graphene.Field(UserProfileType)
+    profile = graphene.Field(ProfileType)
     class Meta:
         model = User
 
+# Define the Query class
+class Query(graphene.ObjectType):
+    profile = graphene.Field(ProfileType, username=graphene.String(required=True))
+    me = graphene.Field(UserType)
+
+    def resolve_profile(self, info, username):
+        # Fetch the profile based on the username
+        try:
+            return Profile.objects.get(user__username=username)  # Assuming Profile has a OneToOne relationship with User
+        except Profile.DoesNotExist:
+            return None  # Or handle it as appropriate
+
+    def resolve_me(self, info):
+        user = info.context.user
+        if user.is_anonymous:
+            raise Exception('Not logged in!')
+        return user
+
+# Define the Mutation class for updating the profile
+class UpdateProfile(graphene.Mutation):
+    class Arguments:
+        bio = graphene.String()
+        location = graphene.String()
+        avatar = graphene.String()
+
+    profile = graphene.Field(ProfileType)
+
+    def mutate(self, info, bio=None, location=None, avatar=None):
+        user = info.context.user
+        if user.is_anonymous:
+            raise Exception('Not logged in!')
+
+        profile = user.profile
+
+        if bio:
+            profile.bio = bio
+        if location:
+            profile.location = location
+        if avatar:
+            profile.avatar = avatar
+
+        profile.save()
+        return UpdateProfile(profile=profile)
+    
 class LoginMutation(graphene.Mutation):
     class Arguments:
         username = String(required=True)
@@ -63,37 +108,7 @@ class Mutation(graphene.ObjectType):
     token_auth = graphql_jwt.ObtainJSONWebToken.Field()  
     verify_token = graphql_jwt.Verify.Field()   # For obtaining a new token
     refresh_token = graphql_jwt.Refresh.Field() # For refreshing the token
+    update_profile = UpdateProfile.Field()
 
-class Query(graphene.ObjectType):
-    users = graphene.List(UserType)
-    current_user = graphene.Field(UserType)
-    get_user_profile = graphene.Field(UserProfileType, id=graphene.ID(required=True))
-
-    def resolve_current_user(self, info):
-        auth = info.context.META.get('HTTP_AUTHORIZATION')
-        if auth:
-            try:
-                token = auth.split(' ')[1]
-                payload = decode_jwt_token(token)
-                user = User.objects.get(id=payload['user_id'])
-                return user
-            except Exception as e:
-                raise Exception(f'Authentication failed: {str(e)}')
-        raise Exception('Not authenticated')
-        return user
-
-    def resolve_users(self, info):
-        return User.objects.all()
-    
-    @login_required
-    def resolve_current_user(self, info):
-        user = info.context.user
-        return user
-    
-    @login_required
-    def resolve_get_user_profile(self,info, id):
-        # Fetch the user profile from the database
-        user = info.context.user
-        if user.is_authenticated:
-            return user  # Return the authenticated user
-        return None  # Or raise an error if necessary
+# Define the schema
+schema = graphene.Schema(query=Query, mutation=Mutation)

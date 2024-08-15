@@ -1,7 +1,7 @@
 <template>
   <div class="login-container">
-    <h2 v-if="!isLoggedIn">Login</h2>
-    <form v-if="!isLoggedIn" @submit.prevent="handleLogin" class="login-form">
+    <h2 v-if="!userStore.isLoggedIn">Login</h2>
+    <form v-if="!userStore.isLoggedIn" @submit.prevent="handleLogin" class="login-form">
       <input 
         v-model="username" 
         type="text" 
@@ -16,15 +16,16 @@
       />
       <button type="submit">Login</button>
     </form>
-    <p v-if="isLoggedIn" class="logged-in-message">You are logged in!</p>
+    <p v-if="userStore.isLoggedIn" class="logged-in-message">You are logged in!</p>
+    <button v-if="userStore.isLoggedIn" @click="handleLogout">Logout</button>
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
   </div>
 </template>
 
+
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed } from 'vue';
 import { useUserStore } from '../stores/userStore';
-import { provideApolloClient, useMutation } from '@vue/apollo-composable';
 import apolloClient from '../apolloClient';
 import { TOKEN_AUTH, REFRESH_TOKEN } from '../graphql/mutations';
 
@@ -32,10 +33,12 @@ import { TOKEN_AUTH, REFRESH_TOKEN } from '../graphql/mutations';
 const username = ref('');
 const password = ref('');
 const errorMessage = ref('');
-const isLoggedIn = ref(false);
 
 // Access the user store
 const userStore = useUserStore();
+
+// Computed property to check login status
+const isLoggedIn = computed(() => userStore.isLoggedIn);
 
 // Handle User Login
 const handleLogin = async () => {
@@ -45,19 +48,17 @@ const handleLogin = async () => {
   }
 
   try {
-    // Call the TOKEN_AUTH mutation using apolloClient.mutate
     const response = await apolloClient.mutate({
-          mutation: TOKEN_AUTH,
-          variables: {
-            username: username.value,
-            password: password.value,
-          },
-        });
+      mutation: TOKEN_AUTH,
+      variables: {
+        username: username.value,
+        password: password.value,
+      },
+    });
 
     const token = response.data.tokenAuth.token;
-    console.log('Token received:', token); // Debugging log
-    localStorage.setItem('authToken', token); // Store token for future use
-    isLoggedIn.value = true; // Update login status
+    localStorage.setItem('authToken', token);
+    userStore.setLoginStatus(true);
     userStore.setUserProfile({ name: username.value, email: '' });
 
     // Reset form fields
@@ -69,36 +70,10 @@ const handleLogin = async () => {
   }
 };
 
-// Refresh User Token
-const handleTokenRefresh = async () => {
-  try {
-    const refreshToken = localStorage.getItem('refresh_token'); // Retrieve refresh token
-    const response = await apolloClient.mutate({
-      mutation: REFRESH_TOKEN,
-      variables: {
-        refresh: refreshToken, // Ensure this matches the mutation definition
-      },
-    });
-
-    const newToken = response.data.refresh.token; // Adjust according to your refresh token response structure
-    console.log('New token received:', newToken); // Debugging log
-    localStorage.setItem('authToken', newToken); // Store new token
-  } catch (error) {
-    console.error('Token refresh failed:', error.message);
-  }
-};
-
-// Watch for token expiration and refresh if needed
-watch(isLoggedIn, (newValue) => {
-  if (newValue) {
-    const interval = setInterval(() => {
-      refreshUserToken(); // Refresh token periodically
-    }, 5 * 60 * 1000); // Refresh every 5 minutes
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(interval);
-  }
-});
+// Handle Logout
+const handleLogout = () => {
+  userStore.logout();
+  };
 
 </script>
 

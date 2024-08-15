@@ -5,10 +5,11 @@ import RegisterComponent from '../components/RegisterComponent.vue';
 import LoginComponent from '../components/LoginComponent.vue';
 
 const routes = [
-  { path:'/', component: HomeComponent },
-  { path: '/register', component: RegisterComponent },
-  { path: '/login', component: LoginComponent },
-  { path: '/profile', component: ProfileComponent },
+  { path:'/', name:'Home', component: HomeComponent },
+  { path: '/register', name:'Register', component: RegisterComponent },
+  { path: '/login', name:'Login', component: LoginComponent },
+  { path: '/profile/:username?', name:'Profile', component: ProfileComponent, props: route => ({ username: route.params.username || 'gis10kwo' }), },
+  
 ];
 
 const router = createRouter({

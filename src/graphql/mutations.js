@@ -11,6 +11,16 @@ mutation Login($username:String!,$password:String!){
     }
 }`
 
+export const REGISTER_USER = gql`
+  mutation RegisterUser($username: String!, $email: String!, $password: String!, $phone_number: String!, $role: String!) {
+    registerUser(username: $username, email: $email, password: $password, phone_number: $phone_number, role: $role) {
+      success
+      message
+    }
+  }
+`;
+
+
 // Define the tokenAuth mutation
 export const TOKEN_AUTH = gql`
   mutation TokenAuth($username: String!, $password: String!) {

@@ -77,3 +77,126 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* styles.css */
+
+/* Container styles */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(to right, #e6e3f5, #dcd7f5);
+}
+
+/* Form wrapper styles */
+.form-wrapper {
+  display: flex;
+  width: 75%;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  padding: 2rem;
+}
+
+/* Image container styles */
+.image-container {
+  width: 50%;
+  flex-shrink: 0;
+}
+
+/* Avatar image styles */
+.avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  border: 1px solid #6b6956;
+}
+
+/* Form content styles */
+.form-content {
+  width: 50%;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Heading styles */
+.heading {
+  color: #004d00; /* Dark Green */
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Form input styles */
+.input-label {
+  display: block;
+  color: #008080; /* Dark Teal */
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.input-field {
+  border: 1px solid #ffd700; /* Golden Yellow */
+  padding: 0.5rem;
+  width: 100%;
+  border-radius: 0.5rem;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #006400; /* Dark Green */
+}
+
+/* Password visibility button styles */
+.password-toggle {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  color: #008080; /* Dark Teal */
+}
+
+/* Error message styles */
+.error-message {
+  background-color: #fdd;
+  color: #d8000c;
+  padding: 0.75rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+/* Submit button styles */
+.submit-button {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  background-color: #1e90ff; /* Dodger Blue */
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  outline: none;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #1c86ee;
+}
+
+/* Link styles */
+.link {
+  color: #004d00; /* Dark Green */
+  text-decoration: underline;
+}
+
+.link:hover {
+  color: #003d00; /* Darker Green */
+}
+
